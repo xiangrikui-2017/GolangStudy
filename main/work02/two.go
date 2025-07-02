@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -46,6 +48,68 @@ func main() {
 	exeTasks(&tasks)
 	fmt.Println("All Tasks Completed")
 
+	r := Rectangle{Width: 5, Height: 3}
+	c := Circle{Radius: 2}
+	fmt.Printf("Rectangle Area: %.2f, Perimeter: %.2f\n", r.Area(), r.Perimeter())
+	fmt.Printf("Circle Area: %.2f, Perimeter: %.2f\n", c.Area(), c.Perimeter())
+	fmt.Println()
+
+	p := Person{Name: "悦", Age: 20}
+	e := Employee{EmployeeId: "28674386723", Person: p}
+	e.printEmployee()
+
+	ch := make(chan int, 10)
+	go func() {
+		// defer close(ch)
+		for i := 1; i <= 10; i++ {
+			ch <- i
+		}
+	}()
+	go func() {
+		for val := range ch {
+			fmt.Println("channel val :", val)
+		}
+	}()
+	time.Sleep(1 * time.Second)
+
+	size := 100
+	wg.Add(2)
+
+	go func(size int) {
+		defer wg.Done()
+		defer close(ch)
+		for i := 1; i <= size; i++ {
+			ch <- i
+		}
+	}(size)
+
+	go func() {
+		defer wg.Done()
+		for val := range ch {
+			fmt.Println("channel val :", val)
+		}
+	}()
+	wg.Wait()
+
+	lock := sync.Mutex{}
+	var total int
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			lock.Lock()
+			defer lock.Unlock()
+			for i := 1; i <= 1000; i++ {
+				total++
+			}
+		}()
+	}
+	wg.Wait()
+	fmt.Printf("Total: %d\n", total)
+	fmt.Println()
+
+	counter := int32(0)
+	atomicAdd(&counter)
 }
 
 /*
@@ -97,29 +161,56 @@ type Shape interface {
 }
 
 type Rectangle struct {
-	Shape
+	Width  float64
+	Height float64
 }
 
 func (r Rectangle) Area() float64 {
-	fmt.Println("调用Rectangle的Area方法")
-	return 20
+	return r.Width * r.Height
 }
 
 func (r Rectangle) Perimeter() float64 {
-	fmt.Println("调用Rectangle的Perimeter方法")
-	return 20
+	return 2 * (r.Width + r.Height)
 }
 
 type Circle struct {
-	Shape
+	Radius float64
 }
 
 func (c Circle) Area() float64 {
-	fmt.Println("调用Circle的Area方法")
-	return 20
+	return math.Pi * c.Radius * c.Radius
 }
 
 func (c Circle) Perimeter() float64 {
-	fmt.Println("调用Circle的Perimeter方法")
-	return 20
+	return 2 * math.Pi * c.Radius
+}
+
+type Person struct {
+	Name string
+	Age  int
+}
+
+type Employee struct {
+	Person
+	EmployeeId string
+}
+
+func (e *Employee) printEmployee() {
+	fmt.Printf("EmployeeName : %v, EmployeeAge : %v, EmployeeId : %v\n", e.Person.Name, e.Person.Age, e.EmployeeId)
+}
+
+func atomicAdd(counter *int32) {
+	wg := sync.WaitGroup{}
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for i := 0; i < 1000; i++ {
+				atomic.AddInt32(counter, 1)
+			}
+		}()
+	}
+	wg.Wait()
+	fmt.Printf("Counter: %d\n", *counter)
+	fmt.Println()
 }
