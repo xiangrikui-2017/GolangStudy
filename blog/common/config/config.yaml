@@ -1,0 +1,18 @@
+
+db:
+  DriverName: "mysql"
+  Database: "vision_cloud_test"
+  Port: "3306"
+  UserName: "sams_test"
+  Password: "$1qaz2wsx$"
+  Host: "rm-2ze9584p1u9q7tq5svo.mysql.rds.aliyuncs.com:3306"
+  Charset: "utf8mb4"
+
+logrus:
+  LogDir: "C:/YUSS/mywork/code/golang/src/blog.log"
+  LogLevel: "info"
+
+jwt:
+  Secret: "blog_secret"
+  TokenExpire: 24
+  Issuer: "yuss"
