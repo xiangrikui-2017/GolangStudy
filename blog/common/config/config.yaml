@@ -8,8 +8,8 @@ db:
   Host: "rm-2ze9584p1u9q7tq5svo.mysql.rds.aliyuncs.com"
   Charset: "utf8mb4"
 
-logrus:
-  LogDir: "C:/YUSS/mywork/code/golang/src/blog.log"
+log:
+  LogDir: "C:/YUSS/mywork/code/golang/src/GolangStudy/blog/blog.log"
   LogLevel: "info"
 
 jwt:

@@ -9,11 +9,12 @@ import (
 var Logger = logrus.New()
 
 func InitLogrus() {
-	// 日志格式
-	Logger.Formatter = &logrus.JSONFormatter{}
 	// 日志文件
-	f, _ := os.Create(Conf.Log.LogDir)
-	Logger.Out = f
+	file, err := os.OpenFile(Conf.Log.LogDir, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+	Logger.Out = file
 	gin.SetMode(gin.ReleaseMode)
 	gin.DefaultWriter = Logger.Out
 	// 设置日志级别
@@ -27,4 +28,7 @@ func InitLogrus() {
 		"debug": logrus.DebugLevel,
 	}
 	Logger.Level = log_level[Conf.Log.LogLevel]
+
+	// 日志格式
+	Logger.Formatter = &logrus.JSONFormatter{}
 }

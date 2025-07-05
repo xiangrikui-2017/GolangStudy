@@ -20,6 +20,6 @@ func main() {
 	db.AutoMigrate(&UserEntity.User{}, &PostEntity.Post{}, &CommentEntity.Comment{})
 	// 初始化日志
 	config.InitLogrus()
-
+	config.Logger.Info("日志打印测试")
 	router.Run(":9090")
 }
