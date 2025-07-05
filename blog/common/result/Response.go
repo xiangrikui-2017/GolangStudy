@@ -11,6 +11,13 @@ type Response struct {
 	Data interface{} `json:"data"` // 返回数据
 }
 
+type PageResponse struct {
+	Response
+	Page     int `json:"page"`      // 当前页码
+	PageSize int `json:"page_size"` // 每页数量
+	Total    int `json:"total"`     // 总数
+}
+
 // 自定义响应信息
 func (res *Response) WithMsg(message string) Response {
 	return Response{
@@ -58,6 +65,19 @@ func Success(data interface{}) *Response {
 		Code: http.StatusOK,
 		Msg:  "success",
 		Data: data,
+	}
+}
+
+func PageSuccess(data interface{}, page int, pageSize int, total int) *PageResponse {
+	return &PageResponse{
+		Response: Response{
+			Code: http.StatusOK,
+			Msg:  "success",
+			Data: data,
+		},
+		Page:     page,
+		PageSize: pageSize,
+		Total:    total,
 	}
 }
 

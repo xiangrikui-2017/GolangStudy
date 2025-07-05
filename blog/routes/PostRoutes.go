@@ -1,16 +1,22 @@
 package routes
 
-import "github.com/gin-gonic/gin"
+import (
+	PostService "GolangStudy/blog/post/service"
+	"github.com/gin-gonic/gin"
+)
 
 func initPostRoutes(publicGroup *gin.RouterGroup, privateGroup *gin.RouterGroup) {
 	// 公共资源
-	publicGroup.Group("/post")
+	postPubGroup := publicGroup.Group("/post")
 	{
-
+		postPubGroup.POST("/list", PostService.ListPost)
 	}
 	// 权限资源
-	privateGroup.Group("/post")
+	postPrivtGroup := privateGroup.Group("/post")
 	{
-
+		postPrivtGroup.GET("/get/:id", PostService.GetPostById)
+		postPrivtGroup.POST("/create", PostService.CreatePost)
+		postPrivtGroup.POST("/update", PostService.UpdatePost)
+		postPrivtGroup.POST("/delete", PostService.DeletePost)
 	}
 }

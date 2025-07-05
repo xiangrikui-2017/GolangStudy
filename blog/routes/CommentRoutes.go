@@ -1,6 +1,9 @@
 package routes
 
-import "github.com/gin-gonic/gin"
+import (
+	CommentService "GolangStudy/blog/comment/service"
+	"github.com/gin-gonic/gin"
+)
 
 func initCommentRoutes(publicGroup *gin.RouterGroup, privateGroup *gin.RouterGroup) {
 	// 公共资源
@@ -9,8 +12,10 @@ func initCommentRoutes(publicGroup *gin.RouterGroup, privateGroup *gin.RouterGro
 
 	}
 	// 权限资源
-	privateGroup.Group("/commnet")
+	commentPrivGroup := privateGroup.Group("/commnet")
 	{
-
+		commentPrivGroup.POST("/create", CommentService.CreatComment)
+		commentPrivGroup.GET("/delete/:id", CommentService.DeleteComment)
+		commentPrivGroup.POST("/list", CommentService.CommentList)
 	}
 }

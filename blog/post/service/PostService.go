@@ -5,7 +5,9 @@ import (
 	"GolangStudy/blog/common/result"
 	PostDto "GolangStudy/blog/post/model/dto"
 	PostEntity "GolangStudy/blog/post/model/entity"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"net/http"
 )
 
@@ -58,10 +60,76 @@ func UpdatePost(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result.Success(post))
 }
 
-func GetPostById(ctx *gin.Context) {
+func ListPost(ctx *gin.Context) {
+	var listPost PostDto.PostListDto
+	if err := ctx.ShouldBindQuery(&listPost); err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Error(err.Error()))
+		return
+	}
+	// 设置分页信息
+	if listPost.Page.PageNum == 0 {
+		listPost.Page.PageNum = 1
+	}
+	if listPost.Page.PageSize == 0 {
+		listPost.Page.PageSize = 10
+	}
+	var total int64
+	var posts []PostEntity.Post
+	baseQuery := config.DB.Omit("content").
+		Count(&total).
+		Limit(listPost.Page.PageSize).
+		Offset((listPost.Page.PageNum - 1) * listPost.Page.PageSize).
+		Order("create_at desc")
+	if listPost.ID != 0 {
+		baseQuery = baseQuery.Where("id = ?", listPost.ID)
+	}
+	if listPost.UserID != 0 {
+		baseQuery = baseQuery.Where("user_id = ?", listPost.UserID)
+	}
+	if listPost.Title != "" {
+		baseQuery = baseQuery.Where("title like ?", "%"+listPost.Title+"%")
+	}
+	if err := baseQuery.Find(&posts).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, result.Error(err.Error()))
+	}
+	ctx.JSON(http.StatusOK, result.Success(posts))
+}
 
+func GetPostById(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	var post PostEntity.Post
+	err := config.DB.First(&post, id).Error
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Error("获取文章详情失败"))
+		return
+	}
+	ctx.JSON(http.StatusOK, result.Success(post))
 }
 
 func DeletePost(ctx *gin.Context) {
+	var getPost PostDto.PostGetOrDelDto
+	if err := ctx.ShouldBindJSON(&getPost); err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Error(err.Error()))
+		return
+	}
 
+	var post PostEntity.Post
+	err := config.DB.Select("id,user_id").Take(&post, getPost.ID).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			ctx.JSON(http.StatusBadRequest, result.Error("未查询到要删除的文章"))
+			return
+		}
+	}
+	if post.UserID != ctx.GetUint("UserId") {
+		ctx.JSON(http.StatusBadRequest, result.Error("文章无删除权限"))
+		return
+	}
+
+	if err := config.DB.Delete(&PostEntity.Post{}, getPost.ID).Error; err != nil {
+		ctx.JSON(http.StatusOK, result.Error("删除失败"))
+	}
+
+	ctx.JSON(http.StatusOK, result.Success("删除成功"))
 }
