@@ -58,12 +58,8 @@ func UpdatePost(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result.Success(post))
 }
 
-func GetPost(ctx *gin.Context) {
-	var getPost PostDto.PostGetOrDelDto
-	if err := ctx.ShouldBindJSON(&getPost); err != nil {
-		ctx.JSON(http.StatusBadRequest, result.Error(err.Error()))
-		return
-	}
+func GetPostById(ctx *gin.Context) {
+
 }
 
 func DeletePost(ctx *gin.Context) {
