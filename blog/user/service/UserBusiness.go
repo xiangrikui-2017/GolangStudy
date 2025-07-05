@@ -13,6 +13,10 @@ import (
 	"time"
 )
 
+func Hello(ctx *gin.Context) {
+	ctx.String(http.StatusOK, "Hello World")
+}
+
 func Register(c *gin.Context) {
 	var regUser UserDto.RegUser
 	if err := c.ShouldBindJSON(&regUser); err != nil {

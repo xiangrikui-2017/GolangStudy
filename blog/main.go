@@ -12,7 +12,7 @@ import (
 func main() {
 	router := gin.Default()
 	// 初始化配置
-	config.InitConfig("common/config/config.yaml")
+	config.InitConfig("blog/common/config/config.yaml")
 	// 初始化路由
 	routes.InitRoutes(router)
 	// 初始化数据库
